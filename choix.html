@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم الرئيسية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* خلفية متحركة */
+        .animated-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .floating-shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        .shape-1 { width: 80px; height: 80px; top: 20%; left: 10%; animation-delay: 0s; }
+        .shape-2 { width: 120px; height: 120px; top: 60%; right: 20%; animation-delay: 5s; }
+        .shape-3 { width: 60px; height: 60px; bottom: 30%; left: 30%; animation-delay: 10s; }
+        .shape-4 { width: 100px; height: 100px; top: 80%; right: 10%; animation-delay: 3s; }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            33% { transform: translateY(-30px) rotate(120deg); opacity: 0.4; }
+            66% { transform: translateY(20px) rotate(240deg); opacity: 0.6; }
+            100% { transform: translateY(0px) rotate(360deg); opacity: 0.7; }
+        }
+
+        /* الحاوي الرئيسي */
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* الرأس */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .main-title {
+            font-size: 3rem;
+            color: white;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+            100% { text-shadow: 0 5px 25px rgba(255, 255, 255, 0.2); }
+        }
+
+        .main-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 300;
+        }
+
+        /* شبكة البطاقات */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* تصميم البطاقة */
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.3),
+                0 10px 30px rgba(255, 255, 255, 0.1);
+        }
+
+        /* أيقونة البطاقة */
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        .inventory-card .card-icon { 
+            animation-delay: 0s; 
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sales-card .card-icon { 
+            animation-delay: 1s; 
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .debt-card .card-icon { 
+            animation-delay: 2s; 
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* عنوان البطاقة */
+        .card-title {
+            font-size: 1.5rem;
+            color: white;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        /* وصف البطاقة */
+        .card-description {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        /* زر البطاقة */
+        .card-button {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .feature-card:hover .card-button {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        /* ألوان مخصصة لكل بطاقة */
+        .inventory-card:hover {
+            box-shadow: 0 25px 50px rgba(255, 107, 107, 0.3);
+        }
+
+        .sales-card:hover {
+            box-shadow: 0 25px 50px rgba(78, 205, 196, 0.3);
+        }
+
+        .debt-card:hover {
+            box-shadow: 0 25px 50px rgba(253, 203, 110, 0.3);
+        }
+
+        /* تصميم متجاوب */
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 2.2rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .feature-card {
+                padding: 30px 20px;
+            }
+
+            .card-icon {
+                font-size: 3rem;
+            }
+
+            .card-title {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 15px;
+            }
+
+            .main-title {
+                font-size: 1.8rem;
+            }
+
+            .main-subtitle {
+                font-size: 1rem;
+            }
+
+            .feature-card {
+                padding: 25px 15px;
+            }
+        }
+
+        /* تأثيرات الدخول */
+        .feature-card {
+            opacity: 0;
+            transform: translateY(50px);
+            animation: cardSlideUp 0.8s ease-out forwards;
+        }
+
+        .inventory-card { animation-delay: 0.2s; }
+        .sales-card { animation-delay: 0.4s; }
+        .debt-card { animation-delay: 0.6s; }
+
+        @keyframes cardSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* تأثير الجسيمات */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle-float 4s linear infinite;
+        }
+
+        @keyframes particle-float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg">
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+        <div class="floating-shape shape-3"></div>
+        <div class="floating-shape shape-4"></div>
+    </div>
+
+    <div class="main-container">
+        <div class="header">
+            <h1 class="main-title">لوحة التحكم</h1>
+            <p class="main-subtitle">نظام إدارة شامل للمبيعات والمخزون والديون</p>
+        </div>
+
+        <div class="cards-grid">
+            <a href="stock.html" class="feature-card inventory-card">
+                <span class="card-icon">📦</span>
+                <h2 class="card-title">إدارة المخزون</h2>
+                <p class="card-description">
+                    تتبع وإدارة جميع المنتجات في المخزن بسهولة وفعالية
+                </p>
+                <div class="card-button">إدارة المخزون</div>
+            </a>
+
+            <a href="web.html" class="feature-card sales-card">
+                <span class="card-icon">💰</span>
+                <h2 class="card-title">المبيعات والأرباح</h2>
+                <p class="card-description">
+                    حساب الأرباح وتتبع المبيعات مع تقارير مفصلة
+                </p>
+                <div class="card-button">عرض المبيعات</div>
+            </a>
+
+            <a href="liste.html" class="feature-card debt-card">
+                <span class="card-icon">📊</span>
+                <h2 class="card-title">إدارة الديون</h2>
+                <p class="card-description">
+                    متابعة وتسجيل جميع الذمم المدينة والدائنة
+                </p>
+                <div class="card-button">إدارة الديون</div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // إضافة جسيمات متحركة
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.width = particle.style.height = Math.random() * 3 + 2 + 'px';
+            document.body.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 4000);
+        }
+
+        // إنشاء جسيمات دورية
+        setInterval(createParticle, 300);
+
+        // تأثيرات تفاعلية للبطاقات
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-15px) scale(1.02)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+
+            // تأثير النقر
+            card.addEventListener('mousedown', function() {
+                this.style.transform = 'translateY(-10px) scale(1.01)';
+            });
+
+            card.addEventListener('mouseup', function() {
+                this.style.transform = 'translateY(-15px) scale(1.02)';
+            });
+        });
+
+        // تأثير اهتزاز للعنوان عند التحميل
+        window.addEventListener('load', function() {
+            const title = document.querySelector('.main-title');
+            title.style.animation = 'titleGlow 2s ease-in-out infinite alternate';
+        });
+    </script>
+</body>
+</html>

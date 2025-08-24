@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الديون</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 50%, #e17055 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* خلفية متحركة */
+        .animated-background {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .element-1 { width: 100px; height: 100px; top: 10%; left: 10%; animation-delay: 0s; }
+        .element-2 { width: 150px; height: 150px; top: 70%; right: 15%; animation-delay: 7s; }
+        .element-3 { width: 80px; height: 80px; bottom: 20%; left: 30%; animation-delay: 14s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.5; }
+            33% { transform: translateY(-40px) rotate(120deg); opacity: 0.3; }
+            66% { transform: translateY(20px) rotate(240deg); opacity: 0.7; }
+        }
+
+        /* الحاوي الرئيسي */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* الرأس */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            color: white;
+            font-weight: 900;
+            margin-bottom: 15px;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, white, transparent);
+            border-radius: 2px;
+        }
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.3rem;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* بطاقات الإحصائيات */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #e17055, #d63031);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .debt-icon { 
+            background: linear-gradient(135deg, #e17055, #d63031);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .credit-icon { 
+            background: linear-gradient(135deg, #00b894, #00a085);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .balance-icon { 
+            background: linear-gradient(135deg, #0984e3, #74b9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* الشبكة الرئيسية */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 3fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* نموذج الإضافة */
+        .add-form-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 35px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .form-title {
+            font-size: 1.8rem;
+            color: white;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 700;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 18px 25px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #e17055;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 30px rgba(225, 112, 85, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+            border: none;
+            color: white;
+            padding: 18px 40px;
+            border-radius: 18px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .add-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .add-btn:hover::before {
+            left: 100%;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(225, 112, 85, 0.4);
+        }
+
+        /* جدول الديون */
+        .debt-table-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 35px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        .table-title {
+            font-size: 1.8rem;
+            color: white;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 700;
+        }
+
+        .debt-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 15px;
+        }
+
+        .debt-table thead th {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            font-weight: 700;
+            border: none;
+            font-size: 1rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .debt-table thead th:first-child {
+            border-radius: 20px 0 0 20px;
+        }
+
+        .debt-table thead th:last-child {
+            border-radius: 0 20px 20px 0;
+        }
+
+        .debt-table tbody tr {
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            border-radius: 20px;
+        }
+
+        .debt-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .debt-table tbody td {
+            padding: 20px 15px;
+            text-align: center;
+            color: white;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .debt-table tbody td:first-child {
+            border-radius: 20px 0 0 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .debt-table tbody td:last-child {
+            border-radius: 0 20px 20px 0;
+        }
+
+        .debt-amount {
+            color: #e17055;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .credit-amount {
+            color: #00b894;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #0984e3, #74b9ff);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(9, 132, 227, 0.4);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #d63031, #e84393);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(214, 48, 49, 0.4);
+        }
+
+        /* حالة فارغة */
+        .empty-state {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 60px 30px;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 25px;
+            opacity: 0.6;
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .empty-message {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .empty-submessage {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        /* زر العودة */
+        .back-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            border: none;
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 2rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 15px 40px rgba(162, 155, 254, 0.3);
+            z-index: 1000;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.2) rotate(10deg);
+            box-shadow: 0 25px 50px rgba(162, 155, 254, 0.4);
+        }
+
+        /* رسائل النجاح */
+        .success-message {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 18px;
+            margin-bottom: 25px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-30px);
+            transition: all 0.4s ease;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .success-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* موجز الديون */
+        .debt-summary {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .summary-title {
+            font-size: 1.6rem;
+            color: white;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .balance-amount {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .balance-positive {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .balance-negative {
+            background: linear-gradient(135deg, #e17055, #d63031);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .balance-zero {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .balance-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.3rem;
+            font-weight: 500;
+        }
+
+        /* تصميم متجاوب */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .add-form-section,
+            .debt-table-section {
+                padding: 25px;
+            }
+
+            .debt-table thead th,
+            .debt-table tbody td {
+                padding: 15px 10px;
+                font-size: 0.9rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .edit-btn, .delete-btn {
+                padding: 8px 15px;
+                font-size: 0.8rem;
+            }
+
+            .back-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+                font-size: 1.7rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .add-form-section,
+            .debt-table-section {
+                padding: 20px;
+            }
+
+            .debt-table-section {
+                max-height: 500px;
+            }
+
+            .balance-amount {
+                font-size: 2.5rem;
+            }
+
+            .debt-summary {
+                padding: 20px;
+            }
+        }
+
+        /* تأثيرات الدخول */
+        .stat-card,
+        .add-form-section,
+        .debt-table-section {
+            opacity: 0;
+            transform: translateY(40px);
+            animation: slideUp 0.8s ease-out forwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .add-form-section { animation-delay: 0.4s; }
+        .debt-table-section { animation-delay: 0.5s; }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* شريط التمرير المخصص */
+        .debt-table-section::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .debt-table-section::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .debt-table-section::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .debt-table-section::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-background">
+        <div class="floating-element element-1"></div>
+        <div class="floating-element element-2"></div>
+        <div class="floating-element element-3"></div>
+    </div>
+
+    <div class="main-container">
+        <div class="header">
+            <h1 class="page-title">📊 إدارة الديون</h1>
+            <p class="page-subtitle">تتبع وإدارة جميع الذمم المدينة والدائنة بكفاءة عالية</p>
+        </div>
+
+        <!-- بطاقات الإحصائيات -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon debt-icon">💸</div>
+                <div class="stat-number" id="totalDebts">0</div>
+                <div class="stat-label">إجمالي ما علي دفعه (دج)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon credit-icon">💰</div>
+                <div class="stat-number" id="totalCredits">0</div>
+                <div class="stat-label">إجمالي ما لي (دج)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon balance-icon">⚖️</div>
+                <div class="stat-number" id="netBalance">0</div>
+                <div class="stat-label">الرصيد الصافي (دج)</div>
+            </div>
+        </div>
+
+        <!-- الشبكة الرئيسية -->
+        <div class="main-grid">
+            <!-- نموذج الإضافة -->
+            <div class="add-form-section">
+                <div class="success-message" id="successMessage">
+                    ✅ تم إضافة السجل بنجاح!
+                </div>
+                
+                <h2 class="form-title">
+                    ➕ إضافة سجل جديد
+                </h2>
+                
+                <div class="input-group">
+                    <label class="input-label" for="debtorName">الاسم الكامل</label>
+                    <input type="text" class="input-field" id="debtorName" placeholder="أدخل الاسم الكامل" required>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label" for="debtAmount">المبلغ الذي أدين به (دج)</label>
+                    <input type="number" class="input-field" id="debtAmount" placeholder="0.00" min="0" step="0.01">
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label" for="creditAmount">المبلغ المستحق لي (دج)</label>
+                    <input type="number" class="input-field" id="creditAmount" placeholder="0.00" min="0" step="0.01">
+                </div>
+                
+                <button class="add-btn" onclick="addEntry()">
+                    إضافة السجل
+                </button>
+            </div>
+
+            <!-- جدول الديون -->
+            <div class="debt-table-section">
+                <h2 class="table-title">
+                    📋 سجل الديون والذمم
+                </h2>
+                
+                <div id="tableContainer">
+                    <table class="debt-table" id="debtTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>ما أدين به</th>
+                                <th>المستحق لي</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="debtTableBody"></tbody>
+                    </table>
+                    
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-icon">📊</div>
+                        <div class="empty-message">لا توجد سجلات حالياً</div>
+                        <div class="empty-submessage">قم بإضافة أول سجل باستخدام النموذج الجانبي</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- موجز الديون -->
+        <div class="debt-summary">
+            <div class="summary-title">الموقف المالي الإجمالي</div>
+            <div class="balance-amount" id="summaryAmount">0.00</div>
+            <div class="balance-label" id="summaryLabel">دينار جزائري</div>
+        </div>
+    </div>
+
+    <!-- زر العودة -->
+    <a href="choix.html" class="back-btn" title="العودة للصفحة الرئيسية">
+        🏠
+    </a>
+
+    <script>
+        let debtData = JSON.parse(localStorage.getItem('debtData')) || [];
+
+        function saveData() {
+            localStorage.setItem('debtData', JSON.stringify(debtData));
+            updateStats();
+            updateTable();
+            updateSummary();
+        }
+
+        function updateStats() {
+            const totalDebts = debtData.reduce((sum, entry) => sum + (entry.debt || 0), 0);
+            const totalCredits = debtData.reduce((sum, entry) => sum + (entry.credit || 0), 0);
+            const netBalance = totalCredits - totalDebts;
+
+            document.getElementById('totalDebts').textContent = totalDebts.toFixed(2);
+            document.getElementById('totalCredits').textContent = totalCredits.toFixed(2);
+            document.getElementById('netBalance').textContent = Math.abs(netBalance).toFixed(2);
+        }
+
+        function updateSummary() {
+            const totalDebts = debtData.reduce((sum, entry) => sum + (entry.debt || 0), 0);
+            const totalCredits = debtData.reduce((sum, entry) => sum + (entry.credit || 0), 0);
+            const netBalance = totalCredits - totalDebts;
+
+            const summaryAmount = document.getElementById('summaryAmount');
+            const summaryLabel = document.getElementById('summaryLabel');
+
+            summaryAmount.textContent = Math.abs(netBalance).toFixed(2);
+
+            if (netBalance > 0) {
+                summaryAmount.className = 'balance-amount balance-positive';
+                summaryLabel.textContent = 'لي (دينار جزائري)';
+            } else if (netBalance < 0) {
+                summaryAmount.className = 'balance-amount balance-negative';
+                summaryLabel.textContent = 'علي (دينار جزائري)';
+            } else {
+                summaryAmount.className = 'balance-amount balance-zero';
+                summaryLabel.textContent = 'متوازن (دينار جزائري)';
+            }
+        }
+
+        function showSuccessMessage() {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.classList.add('show');
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 4000);
+        }
+
+        function addEntry() {
+            const name = document.getElementById('debtorName').value.trim();
+            const debt = parseFloat(document.getElementById('debtAmount').value) || 0;
+            const credit = parseFloat(document.getElementById('creditAmount').value) || 0;
+
+            if (!name) {
+                alert('⚠️ يرجى إدخال الاسم الكامل');
+                return;
+            }
+
+            if (debt === 0 && credit === 0) {
+                alert('⚠️ يرجى إدخال مبلغ في أحد الحقلين على الأقل');
+                return;
+            }
+
+            // تأثير بصري للزر
+            const addBtn = document.querySelector('.add-btn');
+            addBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                addBtn.style.transform = '';
+            }, 150);
+
+            debtData.push({ name, debt, credit });
+            saveData();
+            showSuccessMessage();
+
+            // مسح الحقول
+            document.getElementById('debtorName').value = '';
+            document.getElementById('debtAmount').value = '';
+            document.getElementById('creditAmount').value = '';
+            
+            // تركيز على حقل الاسم
+            document.getElementById('debtorName').focus();
+        }
+
+        function editEntry(index) {
+            const entry = debtData[index];
+            document.getElementById('debtorName').value = entry.name;
+            document.getElementById('debtAmount').value = entry.debt || 0;
+            document.getElementById('creditAmount').value = entry.credit || 0;
+
+            // حذف السجل القديم
+            deleteEntry(index, false);
+        }
+
+        function deleteEntry(index, confirm = true) {
+            if (confirm && !window.confirm('🗑️ هل أنت متأكد من حذف هذا السجل؟')) {
+                return;
+            }
+
+            // تأثير بصري قبل الحذف
+            const row = document.querySelectorAll('#debtTableBody tr')[index];
+            if (row) {
+                row.style.transform = 'scale(0.8)';
+                row.style.opacity = '0.5';
+            }
+
+            setTimeout(() => {
+                debtData.splice(index, 1);
+                saveData();
+            }, 300);
+        }
+
+        function updateTable() {
+            const table = document.getElementById('debtTable');
+            const tbody = document.getElementById('debtTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            if (debtData.length === 0) {
+                table.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            table.style.display = 'table';
+            emptyState.style.display = 'none';
+            tbody.innerHTML = '';
+
+            debtData.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
+                
+                row.innerHTML = `
+                    <td style="font-weight: 700;">${entry.name}</td>
+                    <td class="debt-amount">${(entry.debt || 0).toFixed(2)} دج</td>
+                    <td class="credit-amount">${(entry.credit || 0).toFixed(2)} دج</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="edit-btn" onclick="editEntry(${index})">
+                                ✏️ تعديل
+                            </button>
+                            <button class="delete-btn" onclick="deleteEntry(${index})">
+                                🗑️ حذف
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+                
+                // تأثير دخول متدرج
+                setTimeout(() => {
+                    row.style.transition = 'all 0.5s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        }
+
+        // تحديث الصفحة عند التحميل
+        window.onload = function() {
+            updateStats();
+            updateTable();
+            updateSummary();
+            document.getElementById('debtorName').focus();
+        };
+
+        // إضافة سجل بالضغط على Enter
+        document.querySelectorAll('.input-field').forEach((input, index, inputs) => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    if (index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    } else {
+                        addEntry();
+                    }
+                }
+            });
+        });
+
+        // تأثيرات إضافية للإدخال
+        document.querySelectorAll('.input-field').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-3px)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
